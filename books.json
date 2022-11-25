@@ -1,33 +1,32 @@
 [
     {
-        "id": 1,
-        "productName": "The Adventure of Hucklebary Finn",
-        "location": "Dhaka, Bangladesh",
-        "resalePrice": 100,
-        "originalPrice": 250,
-        "picture": "https://149645218.v2.pressablecdn.com/wp-content/uploads/2018/02/huckleberry-finn.jpg",
-        "used": "4 months",
-        "sellerName": "Hey Man"
+        "id":1,
+        "categoryName": "Novel",
+        "detail": "Find Read Novel at a lower price in this section",
+        "img": "https://i.ibb.co/D5bt0H9/book1.png"
     },
     {
-        "id": 2,
-        "productName": "Harry Potter",
-        "location": "Kushtia, Bangladesh",
-        "resalePrice": 120,
-        "originalPrice": 270,
-        "picture": "https://media.harrypotterfanzone.com/deathly-hallows-us-childrens-edition.jpg",
-        "used": "3 months",
-        "sellerName": "Bye Man"
+        "id":2,
+        "categoryName": "Poetry",
+        "detail": "Discover second hand poetry books from others",
+        "img": "https://i.ibb.co/4SCyKVj/book2.png"
     },
     {
-        "id": 3,
-        "productName": "A million to One",
-        "location": "Kushtia, Bangladesh",
-        "resalePrice": 120,
-        "originalPrice": 270,
-        "picture": "https://www.designforwriters.com/wp-content/uploads/2017/10/design-for-writers-book-cover-tf-2-a-million-to-one.jpg",
-        "used": "3 months",
-        "sellerName": "Bye Man"
+        "id":3,
+        "categoryName": "Non Fiction",
+        "detail": "Lot's of non fiction may be you haven't heard of yet",
+        "img": "https://i.ibb.co/d4jDKR0/book6.png"
+    },
+    {
+        "id":4,
+        "categoryName": "Academic",
+        "detail": "Purchase your desired academic books at second hand price",
+        "img": "https://i.ibb.co/FJhSYBc/book5.png"
+    },
+    {
+        "id":5,
+        "categoryName": "Research and Journal",
+        "detail": "Discover research and journal paper that might be useful to you",
+        "img": "https://i.ibb.co/ngyxbpV/book3.png"
     }
-
 ]
