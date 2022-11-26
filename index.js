@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require("express");
 const cors = require("cors");
 const jwt = require('jsonwebtoken')
@@ -58,11 +58,22 @@ async function run(){
                 res.send(result)
             }
         })
+        app.get('/users', async(req, res)=>{
+            const query = {}
+            const result = await userCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.delete('/users/:id', async(req, res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const result = await userCollection.deleteOne(filter)
+            res.send(result)
+        })
         app.get('/users/seller/:email', async(req, res)=>{
             const email = req.params.email
             const filter = {email}
             const user = await userCollection.findOne(filter)
-            res.send({isSeller: user.userType === 'Seller'})
+            res.send({isSeller: user?.userType === 'Seller'})
         })
         app.get('/jwt', async(req, res)=>{
             const email = req.query.email
@@ -74,13 +85,7 @@ async function run(){
             }
             res.status(401).send({accessToken: ''})
         })
-        // app.get('/users', async(req, res)=>{
-        //     const userEmail = req.query.email
-        //     console.log(userEmail)
-        //     const query = {email: userEmail}
-        //     const result = await userCollection.find(query).toArray()
-        //     res.send(result)
-        // })
+        
     }
     finally{}
 }
