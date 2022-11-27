@@ -55,8 +55,12 @@ async function run() {
             const result = await productsCollection.insertOne(product)
             res.send(result)
         })
-        app.get('/my-products', async(req, res)=>{
+        app.get('/my-products', verifyJWT, async(req, res)=>{
             const email = req.query.email
+            const decodedEmail = req.decoded.email
+            if(email !== decodedEmail){
+                return res.status(403).send({message: 'Forbidden Access'})
+            }
             const query = {sellerEmail:email}
             const result = await productsCollection.find(query).toArray()
             res.send(result)
