@@ -89,6 +89,19 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/users/verify/:id', async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)}
+            const options = {upsert: true}
+            const updatedDoc = {
+                $set:{
+                    verified: 'verified'
+                }
+            }
+            const result = await userCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
         app.get('/jwt', async (req, res) => {
             const email = req.query.email
             const query = { email: email }
