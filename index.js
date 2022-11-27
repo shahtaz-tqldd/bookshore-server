@@ -76,10 +76,10 @@ async function run() {
             res.send({ isSeller: user?.userType === 'Seller' })
         })
 
-        app.put('/users/admin/:id', async(req, res)=>{
+        app.put('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: ObjectId(id)}
-            const options = {upsert: true}
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
             const updatedDoc = {
                 $set: {
                     role: 'admin'
@@ -88,13 +88,19 @@ async function run() {
             const result = await userCollection.updateOne(filter, updatedDoc, options)
             res.send(result)
         })
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email
+            const filter = { email }
+            const user = await userCollection.findOne(filter)
+            res.send({isAdmin: user?.role === 'admin'})
+        })
 
-        app.put('/users/verify/:id', async(req, res)=>{
+        app.put('/users/verify/:id', async (req, res) => {
             const id = req.params.id
-            const filter = {_id: ObjectId(id)}
-            const options = {upsert: true}
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
             const updatedDoc = {
-                $set:{
+                $set: {
                     verified: 'verified'
                 }
             }
