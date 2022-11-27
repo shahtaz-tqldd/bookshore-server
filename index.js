@@ -1,7 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require("express");
 const cors = require("cors");
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config();
@@ -32,6 +32,18 @@ async function run() {
         const productsCollection = client.db('bookShore').collection('products')
         const categoryCollection = client.db('bookShore').collection('categories')
         const userCollection = client.db('bookShore').collection('users')
+        const bookedProductCollection = client.db('bookShore').collection('bookedProducts')
+
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email
+            const query = { email: decodedEmail }
+            const user = await userCollection.findOne(query)
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: "Only Admin is Authorized to do this Action" })
+            }
+            next()
+        }
+
         app.get('/categories', async (req, res) => {
             const query = {}
             const result = await categoryCollection.find(query).toArray()
@@ -39,12 +51,12 @@ async function run() {
         })
         app.get('/products', async (req, res) => {
             const name = req.query.category
-            if(name){
+            if (name) {
                 const query = { category: name }
                 const result = await productsCollection.find(query).toArray()
                 res.send(result)
             }
-            else{
+            else {
                 const query = {}
                 const result = await productsCollection.find(query).toArray()
                 res.send(result)
@@ -55,13 +67,13 @@ async function run() {
             const result = await productsCollection.insertOne(product)
             res.send(result)
         })
-        app.get('/my-products', verifyJWT, async(req, res)=>{
+        app.get('/my-products', verifyJWT, async (req, res) => {
             const email = req.query.email
             const decodedEmail = req.decoded.email
-            if(email !== decodedEmail){
-                return res.status(403).send({message: 'Forbidden Access'})
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' })
             }
-            const query = {sellerEmail:email}
+            const query = { sellerEmail: email }
             const result = await productsCollection.find(query).toArray()
             res.send(result)
         })
@@ -80,7 +92,7 @@ async function run() {
             const result = await userCollection.find(query).toArray()
             res.send(result)
         })
-        app.delete('/users/:id', async (req, res) => {
+        app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const result = await userCollection.deleteOne(filter)
@@ -92,7 +104,7 @@ async function run() {
             const user = await userCollection.findOne(filter)
             res.send({ isSeller: user?.userType === 'Seller' })
         })
-        app.put('/users/admin/:id', async (req, res) => {
+        app.put('/users/admin/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true }
@@ -108,9 +120,9 @@ async function run() {
             const email = req.params.email
             const filter = { email }
             const user = await userCollection.findOne(filter)
-            res.send({isAdmin: user?.role === 'admin'})
+            res.send({ isAdmin: user?.role === 'admin' })
         })
-        app.put('/users/verify/:id', async (req, res) => {
+        app.put('/users/verify/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
             const options = { upsert: true }
@@ -120,6 +132,19 @@ async function run() {
                 }
             }
             const result = await userCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+        app.get('/users/verified/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await userCollection.findOne(query)
+            return res.send({ verifiedUser: user?.verified === 'verified' })
+
+        })
+
+        app.post('/products/booked', verifyJWT, async(req, res)=>{
+            const bookedProduct = req.body
+            const result = await bookedProductCollection.insertOne(bookedProduct)
             res.send(result)
         })
 
