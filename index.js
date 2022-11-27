@@ -39,13 +39,26 @@ async function run() {
         })
         app.get('/products', async (req, res) => {
             const name = req.query.category
-            const query = { category: name }
-            const result = await productsCollection.find(query).toArray()
-            res.send(result)
+            if(name){
+                const query = { category: name }
+                const result = await productsCollection.find(query).toArray()
+                res.send(result)
+            }
+            else{
+                const query = {}
+                const result = await productsCollection.find(query).toArray()
+                res.send(result)
+            }
         })
         app.post('/products', async (req, res) => {
             const product = req.body
             const result = await productsCollection.insertOne(product)
+            res.send(result)
+        })
+        app.get('/my-products', async(req, res)=>{
+            const email = req.query.email
+            const query = {sellerEmail:email}
+            const result = await productsCollection.find(query).toArray()
             res.send(result)
         })
         app.post('/users', async (req, res) => {
@@ -75,7 +88,6 @@ async function run() {
             const user = await userCollection.findOne(filter)
             res.send({ isSeller: user?.userType === 'Seller' })
         })
-
         app.put('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) }
@@ -94,7 +106,6 @@ async function run() {
             const user = await userCollection.findOne(filter)
             res.send({isAdmin: user?.role === 'admin'})
         })
-
         app.put('/users/verify/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
