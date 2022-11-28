@@ -34,6 +34,7 @@ async function run() {
         const userCollection = client.db('bookShore').collection('users')
         const bookedProductCollection = client.db('bookShore').collection('bookedProducts')
         const advertisedProductCollection = client.db('bookShore').collection('advertisedProducts')
+        const wishlistProductCollection = client.db('bookShore').collection('wishlistProducts')
         const blogCollection = client.db('bookShore').collection('blogs')
         
         // admin verification
@@ -125,7 +126,24 @@ async function run() {
             res.send(result)
         })
 
-        // need to solve-----------
+        // wishlist
+        app.post('/products/wishlist', verifyJWT, async (req, res) => {
+            const wishlist = req.body
+            const result = await wishlistProductCollection.insertOne(wishlist)
+            res.send(result)
+        })
+        app.get('/products/wishlist', verifyJWT, async (req, res) => {
+            const email = req.query.email
+            const decodedEmail = req.decoded.email
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            const query = { buyerEmail: email }
+            const result = await wishlistProductCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        // -----------need to solve-----------
         app.put('/products/advertise/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
@@ -152,6 +170,16 @@ async function run() {
         })
         app.get('/users', async (req, res) => {
             const query = {}
+            const result = await userCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.get('/users/sellers', async (req, res) => {
+            const query = {userType: 'Seller'}
+            const result = await userCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.get('/users/buyers', async (req, res) => {
+            const query = {userType: 'Buyer'}
             const result = await userCollection.find(query).toArray()
             res.send(result)
         })
@@ -217,7 +245,7 @@ async function run() {
             const result = await blogCollection.findOne(query)
             res.send(result)
         })
-        
+
         //jwt
         app.get('/jwt', async (req, res) => {
             const email = req.query.email
@@ -238,7 +266,7 @@ run().catch(err => console.error(err))
 
 
 app.get('/', (req, res) => {
-    res.send('Bookshore server is running...')
+    res.send('Bookshore server is running finally...')
 })
 
 app.listen(port, () => {
