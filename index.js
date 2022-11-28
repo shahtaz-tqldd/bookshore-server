@@ -148,6 +148,30 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/products/booked', verifyJWT, async(req, res)=>{
+            const email = req.query.email
+            const decodedEmail = req.decoded.email
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            const query = {buyerEmail: email}
+            const result = await bookedProductCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.put('/products/:id', async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)}
+            const options = {upsert : true}
+            const updatedDoc = {
+                $set:{
+                    status: 'sold'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
         app.get('/jwt', async (req, res) => {
             const email = req.query.email
             const query = { email: email }
