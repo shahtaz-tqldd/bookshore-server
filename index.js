@@ -33,7 +33,10 @@ async function run() {
         const categoryCollection = client.db('bookShore').collection('categories')
         const userCollection = client.db('bookShore').collection('users')
         const bookedProductCollection = client.db('bookShore').collection('bookedProducts')
-
+        const advertisedProductCollection = client.db('bookShore').collection('advertisedProducts')
+        const blogCollection = client.db('bookShore').collection('blogs')
+        
+        // admin verification
         const verifyAdmin = async (req, res, next) => {
             const decodedEmail = req.decoded.email
             const query = { email: decodedEmail }
@@ -44,6 +47,7 @@ async function run() {
             next()
         }
 
+        // categories of the product
         app.get('/categories', async (req, res) => {
             const query = {}
             const result = await categoryCollection.find(query).toArray()
@@ -52,7 +56,7 @@ async function run() {
         app.get('/products', async (req, res) => {
             const name = req.query.category
             if (name) {
-                const query = { category: name, status:'unsold' }
+                const query = { category: name, status: 'unsold' }
                 const result = await productsCollection.find(query).toArray()
                 res.send(result)
             }
@@ -77,6 +81,65 @@ async function run() {
             const result = await productsCollection.find(query).toArray()
             res.send(result)
         })
+        app.post('/products/booked', verifyJWT, async (req, res) => {
+            const bookedProduct = req.body
+            const result = await bookedProductCollection.insertOne(bookedProduct)
+            res.send(result)
+        })
+        app.get('/products/booked', verifyJWT, async (req, res) => {
+            const email = req.query.email
+            const decodedEmail = req.decoded.email
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            const query = { buyerEmail: email }
+            const result = await bookedProductCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    status: 'sold'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+        app.delete('/products/remove/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const result = await productsCollection.deleteOne(filter)
+            res.send(result)
+        })
+        app.post('/products/advertised', async (req, res) => {
+            const product = req.body
+            const result = await advertisedProductCollection.insertOne(product)
+            res.send(result)
+        })
+        app.get('/products/advertised', verifyJWT, async (req, res) => {
+            const query = {}
+            const result = await advertisedProductCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        // need to solve-----------
+        app.put('/products/advertise/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    advertised: 'advertised'
+                }
+            }
+            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+
+        // users section
         app.post('/users', async (req, res) => {
             const user = req.body
             const userEmail = user.email
@@ -142,42 +205,20 @@ async function run() {
 
         })
 
-        app.post('/products/booked', verifyJWT, async(req, res)=>{
-            const bookedProduct = req.body
-            const result = await bookedProductCollection.insertOne(bookedProduct)
+        // blogs
+        app.get('/blogs', async(req, res)=>{
+            const query = {}
+            const result = await blogCollection.find(query).toArray()
             res.send(result)
         })
-
-        app.get('/products/booked', verifyJWT, async(req, res)=>{
-            const email = req.query.email
-            const decodedEmail = req.decoded.email
-            if (email !== decodedEmail) {
-                return res.status(403).send({ message: 'Forbidden Access' })
-            }
-            const query = {buyerEmail: email}
-            const result = await bookedProductCollection.find(query).toArray()
-            res.send(result)
-        })
-
-        app.put('/products/:id', async(req, res)=>{
+        app.get('/blogs/:id', async(req, res)=>{
             const id = req.params.id
-            const filter = {_id: ObjectId(id)}
-            const options = {upsert : true}
-            const updatedDoc = {
-                $set:{
-                    status: 'sold'
-                }
-            }
-            const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            const query = {_id: ObjectId(id)}
+            const result = await blogCollection.findOne(query)
             res.send(result)
         })
-        app.delete('/products/remove/:id', verifyJWT, async(req, res)=>{
-            const id = req.params.id
-            const filter = {_id: ObjectId(id)}
-            const result = await productsCollection.deleteOne(filter)
-            res.send(result)
-        })
-
+        
+        //jwt
         app.get('/jwt', async (req, res) => {
             const email = req.query.email
             const query = { email: email }
