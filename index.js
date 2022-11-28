@@ -52,7 +52,7 @@ async function run() {
         app.get('/products', async (req, res) => {
             const name = req.query.category
             if (name) {
-                const query = { category: name }
+                const query = { category: name, status:'unsold' }
                 const result = await productsCollection.find(query).toArray()
                 res.send(result)
             }
@@ -169,6 +169,12 @@ async function run() {
                 }
             }
             const result = await productsCollection.updateOne(filter, updatedDoc, options)
+            res.send(result)
+        })
+        app.delete('/products/remove/:id', verifyJWT, async(req, res)=>{
+            const id = req.params.id
+            const filter = {_id: ObjectId(id)}
+            const result = await productsCollection.deleteOne(filter)
             res.send(result)
         })
 
